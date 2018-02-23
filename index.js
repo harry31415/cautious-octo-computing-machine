@@ -10,11 +10,12 @@ console.dir(argv);
 
 var filename =argv._[0] ;
 var port = argv.p || 3636;
+var stop = argv.s || 0;
 
 console.log('Filename: '+filename+' Port: '+port);
 
 
-var socket = io.connect('http://localhost:'+port);
+var socket = io.connect('http://dory.microlab.ntua.gr:'+port);
 var stream = ss.createStream();
 
 const ip = require('ip');
@@ -32,6 +33,15 @@ socket.emit('tokenID', user);
 
 ss(socket).emit('scriptPY', stream, {name: filename});
 fs.createReadStream(filename).pipe(stream);
+
+if (stop>0) {
+    console.log("Kill signal in :",stop);
+
+    setTimeout(function(){
+        socket.emit('stopScript','lele');
+    }, stop);
+}
+
 socket.on('outPy', function(msg){
     console.log("Received: " + msg);
 });
